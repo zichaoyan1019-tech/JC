@@ -80,7 +80,7 @@ const IntroSection: React.FC = () => {
         {/* Background Image Layer */}
         <div className="absolute inset-0 z-0">
             <img 
-                src="/JC/images/slide7.jpg" 
+                src="/JC/images/slide7.jpg"
                 alt="Background" 
                 className="w-full h-full object-cover object-center opacity-40 scale-105 blur-sm"
             />
