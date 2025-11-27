@@ -1,0 +1,33 @@
+{
+  "name": "john-cage-exhibition",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "homepage": "https://zichaoyan1019-tech.github.io/JC/",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "lint": "eslint .",
+    "preview": "vite preview",
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d dist"
+  },
+  "dependencies": {
+    "@google/genai": "^1.30.0",
+    "d3": "^7.9.0",
+    "framer-motion": "^11.0.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.3",
+    "@types/react-dom": "^18.3.0",
+    "@vitejs/plugin-react": "^4.3.1",
+    "autoprefixer": "^10.4.19",
+    "gh-pages": "^6.3.0",
+    "postcss": "^8.4.38",
+    "tailwindcss": "^3.4.4",
+    "typescript": "^5.5.3",
+    "vite": "^5.4.1"
+  }
+}
