@@ -74,14 +74,28 @@ const IntroSection: React.FC = () => {
         <NavAnchor label="Time" onClick={() => scrollToSection(timelineRef)} />
       </div>
 
-      {/* 1. Manifesto / Summary (Full Width) */}
-      <section ref={introRef} className="px-6 py-32 max-w-5xl mx-auto text-center scroll-mt-24">
-        <div className="inline-block border-b-2 border-black pb-8 mb-8">
-            <span className="font-mono text-xs uppercase tracking-[0.4em] text-zinc-400">Introduction</span>
+      {/* 1. Manifesto / Summary (Full Width) - Now with Background Image */}
+      <section ref={introRef} className="relative w-full py-32 scroll-mt-24 overflow-hidden bg-zinc-900 text-white">
+        
+        {/* Background Image Layer */}
+        <div className="absolute inset-0 z-0">
+            <img 
+                src="/JC/images/slide7.jpg" 
+                alt="Background" 
+                className="w-full h-full object-cover object-center opacity-40 scale-105 blur-sm"
+            />
+            {/* Overlay to ensure text readability */}
+            <div className="absolute inset-0 bg-black/50"></div>
         </div>
-        <p className="text-2xl md:text-4xl leading-relaxed font-serif font-light text-zinc-900 antialiased">
-          {INTRO_SUMMARY}
-        </p>
+
+        <div className="relative z-10 max-w-5xl mx-auto text-center px-6">
+            <div className="inline-block border-b-2 border-white/30 pb-8 mb-8">
+                <span className="font-mono text-xs uppercase tracking-[0.4em] text-zinc-300">Introduction</span>
+            </div>
+            <p className="text-2xl md:text-4xl leading-relaxed font-serif font-light text-zinc-100 antialiased drop-shadow-lg">
+            {INTRO_SUMMARY}
+            </p>
+        </div>
       </section>
 
       {/* 2. Split Layout: Sticky Gallery (Left) + Biography (Right) */}
