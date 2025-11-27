@@ -1,5 +1,6 @@
 
 import React, { useState, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 
 // ==========================================
 // DATA: Interactive Works Detail
@@ -100,114 +101,127 @@ const CONCEPT_TIMELINE = [
 ];
 
 // ==========================================
-// MODAL COMPONENT (Redesigned Vertical Layout)
+// MODAL COMPONENT (Widened & Grid Layout using PORTAL)
 // ==========================================
 const WorkDetailModal: React.FC<{ workTitle: string; onClose: () => void }> = ({ workTitle, onClose }) => {
   const work = INTERACTIVE_WORKS[workTitle];
   
   if (!work) return null;
 
-  return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/95 backdrop-blur-md animate-fade-in">
-      <div className="bg-zinc-900 border border-amber-500/20 w-full max-w-3xl max-h-[90vh] overflow-y-auto rounded-xl shadow-2xl relative flex flex-col">
+  // Using createPortal to attach the modal to document.body
+  // This bypasses any parent transform/overflow issues, ensuring fixed positioning works relative to the viewport.
+  return createPortal(
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 md:p-8 bg-black/95 backdrop-blur-md animate-fade-in">
+      {/* Increased max-width to 7xl for theater mode */}
+      <div className="bg-zinc-900 border border-amber-500/20 w-full max-w-7xl max-h-[90vh] overflow-y-auto rounded-xl shadow-2xl relative flex flex-col">
         
         {/* Close Button */}
         <button 
           onClick={onClose}
-          className="fixed md:absolute top-4 right-4 text-zinc-400 hover:text-white z-50 p-2 bg-black/50 rounded-full transition-transform hover:scale-110 border border-white/10 hover:border-white"
+          className="fixed md:absolute top-6 right-6 text-zinc-400 hover:text-white z-50 p-2 bg-black/50 rounded-full transition-transform hover:scale-110 border border-white/10 hover:border-white"
         >
           <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" /></svg>
         </button>
 
-        <div className="p-8 md:p-12 flex flex-col gap-12">
+        <div className="p-8 md:p-12">
             
-            {/* 1. Header & Overview */}
-            <div>
+            <div className="mb-8">
                <span className="font-mono text-amber-500 text-sm uppercase tracking-widest mb-2 block">
                  {work.year}
                </span>
-               <h2 className="text-3xl md:text-5xl font-bold text-white mb-6 leading-none tracking-tight">{work.title}</h2>
-               
-               <div className="bg-black/40 p-6 rounded border border-white/5">
-                  <h3 className="text-zinc-500 text-xs uppercase tracking-widest mb-3 font-mono">Overview</h3>
-                  <p className="text-zinc-300 leading-relaxed font-light text-base md:text-lg">
-                    {work.desc}
-                  </p>
-               </div>
+               <h2 className="text-4xl md:text-6xl font-bold text-white leading-none tracking-tight">{work.title}</h2>
             </div>
 
-            {/* 2. Score Section */}
-            <div>
-                <div className="flex items-center justify-between mb-4">
-                    <h3 className="text-amber-500 text-xs uppercase tracking-widest font-mono">Score</h3>
-                    {work.scoreUrl && (
-                        <a 
-                            href={work.scoreUrl} 
-                            target="_blank" 
-                            rel="noopener noreferrer"
-                            className="bg-white text-black text-xs px-4 py-2 rounded font-bold hover:bg-zinc-200 transition-colors"
-                        >
-                            Open Score in New Tab ↗
-                        </a>
-                    )}
-                </div>
+            {/* Grid Layout: Text on Left, Media on Right */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
                 
-                <div className="w-full bg-zinc-950 border border-zinc-800 rounded-lg overflow-hidden relative">
-                    {work.scoreIsWebPage ? (
-                        // If it's a webpage (like the IU library), we use an iframe but assume it might fail, 
-                        // so the button above is critical. We also set a fixed height.
-                        <div className="w-full h-[500px] relative bg-zinc-900 flex flex-col items-center justify-center">
-                            <p className="text-zinc-500 mb-4 px-4 text-center">
-                                Previewing external library content...<br/>
-                                <span className="text-xs opacity-50">(If blank, use the button above)</span>
-                            </p>
-                            <iframe 
-                                src={work.scoreUrl} 
-                                className="w-full h-full absolute inset-0 opacity-100 z-10 bg-white"
-                                title="Score Preview"
-                            />
-                        </div>
-                    ) : (
-                        // Standard Image
-                        <img 
-                            src={work.scoreUrl} 
-                            alt="Score" 
-                            className="w-full h-auto object-contain max-h-[600px] bg-white/5" 
-                            onError={(e) => (e.target as HTMLImageElement).style.display = 'none'}
-                        />
-                    )}
+                {/* Column 1: Overview */}
+                <div className="space-y-8">
+                   <div className="bg-black/40 p-8 rounded-lg border border-white/5">
+                      <h3 className="text-zinc-500 text-xs uppercase tracking-widest mb-4 font-mono">Overview</h3>
+                      <p className="text-zinc-300 leading-loose font-light text-lg md:text-xl">
+                        {work.desc}
+                      </p>
+                   </div>
                 </div>
-            </div>
 
-            {/* 3. Video Section */}
-            <div>
-                 <div className="flex items-center justify-between mb-4">
-                    <h3 className="text-amber-500 text-xs uppercase tracking-widest font-mono">Recording</h3>
-                    <a 
-                        href={`https://www.youtube.com/watch?v=${work.videoId}`} 
-                        target="_blank" 
-                        rel="noopener noreferrer"
-                        className="bg-white text-black text-xs px-4 py-2 rounded font-bold hover:bg-zinc-200 transition-colors"
-                    >
-                        Open YouTube ↗
-                    </a>
-                </div>
-                {/* FORCE ASPECT RATIO AND WIDTH */}
-                <div className="w-full aspect-video bg-black rounded-lg overflow-hidden border border-zinc-800 shadow-2xl relative">
-                   <iframe 
-                     className="absolute inset-0 w-full h-full"
-                     src={`https://www.youtube.com/embed/${work.videoId}`} 
-                     title={work.title}
-                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-                     allowFullScreen
-                   ></iframe>
+                {/* Column 2: Media (Score & Video) */}
+                <div className="space-y-8">
+                    
+                    {/* Score Section */}
+                    <div>
+                        <div className="flex items-center justify-between mb-3">
+                            <h3 className="text-amber-500 text-xs uppercase tracking-widest font-mono">Score</h3>
+                            {work.scoreUrl && (
+                                <a 
+                                    href={work.scoreUrl} 
+                                    target="_blank" 
+                                    rel="noopener noreferrer"
+                                    className="bg-white text-black text-[10px] md:text-xs px-3 py-1.5 rounded font-bold hover:bg-zinc-200 transition-colors uppercase tracking-wide"
+                                >
+                                    Open External Link ↗
+                                </a>
+                            )}
+                        </div>
+                        
+                        <div className="w-full bg-zinc-950 border border-zinc-800 rounded-lg overflow-hidden relative group">
+                            {work.scoreIsWebPage ? (
+                                <div className="w-full h-[300px] relative bg-zinc-900 flex flex-col items-center justify-center">
+                                    <p className="text-zinc-500 mb-4 px-4 text-center text-sm">
+                                        Library Preview<br/>
+                                        <span className="text-xs opacity-50">(Click button above if blank)</span>
+                                    </p>
+                                    <iframe 
+                                        src={work.scoreUrl} 
+                                        className="w-full h-full absolute inset-0 opacity-100 z-10 bg-white"
+                                        title="Score Preview"
+                                    />
+                                </div>
+                            ) : (
+                                <div className="w-full bg-black/20 flex items-center justify-center h-[300px] md:h-[400px]">
+                                    <img 
+                                        src={work.scoreUrl} 
+                                        alt="Score" 
+                                        className="w-full h-full object-contain p-2" 
+                                        onError={(e) => (e.target as HTMLImageElement).style.display = 'none'}
+                                    />
+                                </div>
+                            )}
+                        </div>
+                    </div>
+
+                    {/* Video Section */}
+                    <div>
+                         <div className="flex items-center justify-between mb-3">
+                            <h3 className="text-amber-500 text-xs uppercase tracking-widest font-mono">Recording</h3>
+                            <a 
+                                href={`https://www.youtube.com/watch?v=${work.videoId}`} 
+                                target="_blank" 
+                                rel="noopener noreferrer"
+                                className="bg-white text-black text-[10px] md:text-xs px-3 py-1.5 rounded font-bold hover:bg-zinc-200 transition-colors uppercase tracking-wide"
+                            >
+                                Open YouTube ↗
+                            </a>
+                        </div>
+                        <div className="w-full aspect-video bg-black rounded-lg overflow-hidden border border-zinc-800 shadow-xl">
+                           <iframe 
+                             className="w-full h-full"
+                             src={`https://www.youtube.com/embed/${work.videoId}`} 
+                             title={work.title}
+                             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                             allowFullScreen
+                           ></iframe>
+                        </div>
+                    </div>
+
                 </div>
             </div>
 
         </div>
 
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
 
@@ -394,7 +408,7 @@ const PreparedPianoWidget: React.FC = () => {
                 : 'bg-zinc-950/80 text-zinc-500 hover:bg-zinc-900 hover:text-zinc-300'}
             `}
           >
-            <div className={`absolute top-0 left-0 right-0 h-full bg-gradient-to-b from-amber-500/10 to-transparent opacity-0 group-hover/key:opacity-100 transition-opacity`}></div>
+            <div className={`absolute top-0 left-0 right-0 h-full bg-gradient-to-b from-amber-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity`}></div>
             <span className="relative z-10">{key}</span>
           </button>
         ))}
@@ -633,7 +647,7 @@ const Concept: React.FC = () => {
         </div>
 
         {/* --- 1. Horizontal Timeline Section --- */}
-        <section className="mb-16 overflow-x-auto pb-12 scrollbar-hide">
+        <section className="mb-8 overflow-x-auto pb-12 scrollbar-hide">
            <div className="min-w-[1200px] relative pt-12">
               
               <div className="absolute top-12 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/30 to-transparent"></div>
