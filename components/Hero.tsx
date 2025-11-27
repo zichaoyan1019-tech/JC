@@ -38,7 +38,7 @@ const Hero: React.FC = () => {
       {/* Background Image Layer (Blurred) */}
       <div className="absolute inset-0 z-0">
           <img 
-            src="/JC/images/slide1.jpg" 
+            src="/JC/images/slide10.jpg" 
             alt="Atmospheric Background" 
             className="w-full h-full object-cover opacity-30 blur-sm scale-105"
           />
