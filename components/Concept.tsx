@@ -5,14 +5,20 @@ import { createPortal } from 'react-dom';
 // ==========================================
 // DATA: Interactive Works Detail
 // ==========================================
+interface VideoItem {
+  id: string;
+  title: string;
+}
+
 interface WorkDetail {
   id: string;
   title: string;
   year: string;
   desc: string;
-  videoId: string; // YouTube ID
-  scoreUrl?: string; // URL for direct image or link
-  scoreIsWebPage?: boolean; // If true, we treat it as a link wrapper rather than a direct image
+  videos: VideoItem[]; // Array of videos
+  scoreType: 'web' | 'image'; 
+  scoreUrl?: string; // For single web embed
+  scoreImages?: string[]; // For multiple local images
 }
 
 const INTERACTIVE_WORKS: Record<string, WorkDetail> = {
@@ -20,50 +26,71 @@ const INTERACTIVE_WORKS: Record<string, WorkDetail> = {
     id: "sonatas",
     title: "Sonatas and Interludes",
     year: "1946–48",
-    desc: "Sonatas and Interludes (1946–48) represents John Cage’s mature development of the prepared piano, inspired by Indian aesthetic theory of rasa — the eight “permanent emotions.” About 45 notes are prepared with screws, bolts, and other objects inserted between the strings, transforming the piano into a percussive ensemble. The cycle of sixteen sonatas and four interludes explores subtle modulations of timbre and proportion rather than dramatic contrasts, marking a turning point in Cage’s compositional voice.",
-    videoId: "N6Sl5wmy9t4", 
-    scoreUrl: "https://pages.dlib.indiana.edu/concern/scanned_resources/dv405sk331",
-    scoreIsWebPage: true
+    desc: "Sonatas and Interludes (1946–48) represents John Cage’s mature development of the prepared piano, inspired by Indian aesthetic theory of rasa — the eight “permanent emotions.” About 45 notes are prepared with screws, bolts, and other objects inserted between the strings, transforming the piano into a percussive ensemble.",
+    videos: [{ id: "N6Sl5wmy9t4", title: "Jesse Myers (Prepared Piano)" }], 
+    scoreType: 'web',
+    scoreUrl: "https://pages.dlib.indiana.edu/concern/scanned_resources/dv405sk331"
   },
   "Music of Changes": {
     id: "changes",
     title: "Music of Changes",
     year: "1951",
     desc: "A groundbreaking work composed entirely using the I Ching (Book of Changes). Cage flipped coins to determine pitch, duration, and dynamics, effectively removing his personal taste from the creative process.",
-    videoId: "B_8KqiNgmKQ",
-    scoreUrl: "https://upload.wikimedia.org/wikipedia/commons/e/ea/Music_of_Changes_notation.png"
+    videos: [{ id: "B4wJFTGyELE", title: "Music of Changes" }],
+    scoreType: 'web',
+    scoreUrl: "https://pages.dlib.indiana.edu/concern/scanned_resources/djs956w947"
   },
   "4′33″": {
     id: "433",
     title: "4′33″",
     year: "1952",
-    desc: "Cage's most famous and controversial work. The performer sits at the instrument and plays nothing for four minutes and thirty-three seconds. The piece is not silence, but the ambient sounds of the environment surrounding the audience.",
-    videoId: "JTEFKFiXSx4",
-    scoreUrl: "https://upload.wikimedia.org/wikipedia/en/d/d4/433_score.jpg"
+    desc: "Cage's most famous and controversial work. The performer sits at the instrument and plays nothing for four minutes and thirty-three seconds. The piece is not silence, but the ambient sounds of the environment.",
+    videos: [{ id: "JTEFKFiXSx4", title: "William Marx (2010)" }],
+    scoreType: 'web',
+    scoreUrl: "https://pages.dlib.indiana.edu/concern/scanned_resources/d8p58pn85k"
   },
   "Concert for Piano and Orchestra": {
     id: "concert",
     title: "Concert for Piano and Orchestra",
     year: "1957–58",
     desc: "A seminal indeterminate work. The piano part consists of 84 different types of composition to be played in any order. The orchestra parts are graphic scores without a fixed master score.",
-    videoId: "pGq86g66ZYE",
-    scoreUrl: "https://media.moma.org/s/ge/collection_ge/35/35036195-20d0-482a-a92c-687f87a8636a_pred.jpg"
+    videos: [{ id: "3Z5EpvdtmB4", title: "Concert for Piano and Orchestra" }],
+    scoreType: 'image',
+    scoreImages: [
+        "/JC/images/Concert for Piano and Orchestra1.jpg",
+        "/JC/images/Concert for Piano and Orchestra2.jpg",
+        "/JC/images/Concert for Piano and Orchestra3.jpg",
+        "/JC/images/Concert for Piano and Orchestra4.jpg",
+        "/JC/images/Concert for Piano and Orchestra5.jpg",
+        "/JC/images/Concert for Piano and Orchestra6.jpg"
+    ]
   },
   "Cheap Imitation": {
     id: "cheap",
     title: "Cheap Imitation",
     year: "1969",
-    desc: "A 'chance-derived' arrangement of Erik Satie's 'Socrate'. Cage kept the rhythmic structure but used chance operations to alter the pitches, resulting in a haunting, modal melody.",
-    videoId: "YtD5wXn4t1E",
-    scoreUrl: "https://i.pinimg.com/736x/2a/1f/22/2a1f2249764585863333337351664421.jpg"
+    desc: "A 'chance-derived' arrangement of Erik Satie's 'Socrate'. Cage kept the rhythmic structure but used chance operations to alter the pitches, resulting in a haunting, modal melody. Compare Cage's piano version with Satie's original vocal work below.",
+    videos: [
+        { id: "D6ukoi7m2wM", title: "John Cage: Cheap Imitation" },
+        { id: "SN5urI-Gy38", title: "Erik Satie: Socrate (Comparison)" }
+    ],
+    scoreType: 'image',
+    scoreImages: [
+        "/JC/images/cheap imitation.jpg",
+        "/JC/images/Socrate.jpg"
+    ]
   },
   "Etudes Australes": {
     id: "australes",
     title: "Etudes Australes",
     year: "1974–75",
     desc: "A monumental cycle of 32 etudes based on star charts (Atlas Eclipticalis). The difficulty is extreme, requiring the pianist to play independent layers for each hand.",
-    videoId: "q4l7uT_3C-M",
-    scoreUrl: "https://i.pinimg.com/originals/c9/76/9a/c9769a53165241065181752d50848135.jpg"
+    videos: [{ id: "21siGmjyAfk", title: "Etudes Australes" }],
+    scoreType: 'image',
+    scoreImages: [
+        "/JC/images/Etudes Australes I.jpg",
+        "/JC/images/Etudes Australes XVII.jpg"
+    ]
   }
 };
 
@@ -101,126 +128,270 @@ const CONCEPT_TIMELINE = [
 ];
 
 // ==========================================
+// IMAGE VIEWER COMPONENT (Zoom/Pan)
+// ==========================================
+const ImageViewer: React.FC<{ src: string; onClose: () => void }> = ({ src, onClose }) => {
+  const [scale, setScale] = useState(1);
+  const [position, setPosition] = useState({ x: 0, y: 0 });
+  const [isDragging, setIsDragging] = useState(false);
+  const startPos = useRef({ x: 0, y: 0 });
+  const imgRef = useRef<HTMLImageElement>(null);
+
+  // Reset zoom/pos when source changes
+  useEffect(() => {
+    setScale(1);
+    setPosition({ x: 0, y: 0 });
+  }, [src]);
+
+  const handleWheel = (e: React.WheelEvent) => {
+    e.stopPropagation();
+    const delta = e.deltaY * -0.001;
+    const newScale = Math.min(Math.max(0.5, scale + delta), 4);
+    setScale(newScale);
+  };
+
+  const handleMouseDown = (e: React.MouseEvent) => {
+    e.preventDefault();
+    setIsDragging(true);
+    startPos.current = { x: e.clientX - position.x, y: e.clientY - position.y };
+  };
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!isDragging) return;
+    e.preventDefault();
+    const newX = e.clientX - startPos.current.x;
+    const newY = e.clientY - startPos.current.y;
+    setPosition({ x: newX, y: newY });
+  };
+
+  const handleMouseUp = () => setIsDragging(false);
+
+  return createPortal(
+    <div 
+        className="fixed inset-0 z-[11000] bg-black/95 flex flex-col items-center justify-center animate-fade-in select-none"
+        onClick={onClose} // Close when clicking background
+    >
+      {/* Top Bar (Close) */}
+      <div className="absolute top-0 right-0 p-6 z-50">
+        <button 
+          onClick={onClose}
+          className="bg-black/50 hover:bg-zinc-800 text-white p-3 rounded-full border border-white/20 transition-all"
+        >
+          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" /></svg>
+        </button>
+      </div>
+
+      {/* Image Container */}
+      <div 
+        className="relative w-full h-full flex items-center justify-center overflow-hidden cursor-move"
+        onWheel={handleWheel}
+        onMouseDown={handleMouseDown}
+        onMouseMove={handleMouseMove}
+        onMouseUp={handleMouseUp}
+        onMouseLeave={handleMouseUp}
+        onClick={(e) => e.stopPropagation()} // Prevent close when clicking image area
+      >
+        <img 
+          ref={imgRef}
+          src={src} 
+          alt="Full Score" 
+          draggable={false}
+          className="max-w-none transition-transform duration-75 ease-linear shadow-2xl"
+          style={{ 
+            transform: `translate(${position.x}px, ${position.y}px) scale(${scale})`,
+            maxHeight: '90vh',
+            maxWidth: '90vw'
+          }}
+        />
+      </div>
+
+      {/* Bottom Controls */}
+      <div 
+        className="absolute bottom-8 left-1/2 -translate-x-1/2 bg-zinc-900/90 border border-zinc-700 px-6 py-3 rounded-full flex items-center gap-4 z-50 shadow-xl"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <button onClick={() => setScale(s => Math.max(0.5, s - 0.25))} className="text-zinc-400 hover:text-white font-mono text-xl leading-none px-2">-</button>
+        
+        <input 
+          type="range" 
+          min="0.5" 
+          max="3" 
+          step="0.1" 
+          value={scale} 
+          onChange={(e) => setScale(parseFloat(e.target.value))}
+          className="w-32 accent-amber-500 cursor-pointer"
+        />
+        
+        <button onClick={() => setScale(s => Math.min(3, s + 0.25))} className="text-zinc-400 hover:text-white font-mono text-xl leading-none px-2">+</button>
+        
+        <div className="w-px h-4 bg-zinc-700 mx-1"></div>
+        
+        <button 
+          onClick={() => { setScale(1); setPosition({x:0, y:0}); }} 
+          className="text-[10px] font-mono uppercase tracking-widest text-zinc-400 hover:text-white"
+        >
+          Reset
+        </button>
+      </div>
+    </div>,
+    document.body
+  );
+};
+
+
+// ==========================================
 // MODAL COMPONENT (Widened & Grid Layout using PORTAL)
 // ==========================================
 const WorkDetailModal: React.FC<{ workTitle: string; onClose: () => void }> = ({ workTitle, onClose }) => {
   const work = INTERACTIVE_WORKS[workTitle];
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
   
   if (!work) return null;
 
-  // Using createPortal to attach the modal to document.body
-  // This bypasses any parent transform/overflow issues, ensuring fixed positioning works relative to the viewport.
+  // Using createPortal to attach the modal to document.body, bypassing z-index/overflow of parent containers
   return createPortal(
-    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 md:p-8 bg-black/95 backdrop-blur-md animate-fade-in">
-      {/* Increased max-width to 7xl for theater mode */}
-      <div className="bg-zinc-900 border border-amber-500/20 w-full max-w-7xl max-h-[90vh] overflow-y-auto rounded-xl shadow-2xl relative flex flex-col">
-        
-        {/* Close Button */}
-        <button 
-          onClick={onClose}
-          className="fixed md:absolute top-6 right-6 text-zinc-400 hover:text-white z-50 p-2 bg-black/50 rounded-full transition-transform hover:scale-110 border border-white/10 hover:border-white"
-        >
-          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" /></svg>
-        </button>
+    <>
+      <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 md:p-8 bg-black/95 backdrop-blur-md animate-fade-in">
+        {/* Container: Max width 7xl for "Theater Mode", Max Height for viewport safety */}
+        <div className="bg-zinc-900 border border-amber-500/20 w-full max-w-7xl max-h-[90vh] overflow-y-auto rounded-xl shadow-2xl relative flex flex-col">
+          
+          {/* Sticky Close Button */}
+          <div className="sticky top-0 right-0 w-full flex justify-end p-4 z-50 pointer-events-none">
+              <button 
+              onClick={onClose}
+              className="pointer-events-auto text-zinc-400 hover:text-white p-2 bg-black/80 rounded-full transition-transform hover:scale-110 border border-white/20 hover:border-white shadow-lg"
+              >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" /></svg>
+              </button>
+          </div>
 
-        <div className="p-8 md:p-12">
-            
-            <div className="mb-8">
-               <span className="font-mono text-amber-500 text-sm uppercase tracking-widest mb-2 block">
-                 {work.year}
-               </span>
-               <h2 className="text-4xl md:text-6xl font-bold text-white leading-none tracking-tight">{work.title}</h2>
-            </div>
+          <div className="px-8 pb-12 md:px-12 md:pb-16 -mt-12">
+              
+              <div className="mb-10 border-b border-white/10 pb-6">
+                <span className="font-mono text-amber-500 text-sm uppercase tracking-widest mb-2 block">
+                  {work.year}
+                </span>
+                <h2 className="text-4xl md:text-6xl font-bold text-white leading-none tracking-tight">{work.title}</h2>
+              </div>
 
-            {/* Grid Layout: Text on Left, Media on Right */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-                
-                {/* Column 1: Overview */}
-                <div className="space-y-8">
-                   <div className="bg-black/40 p-8 rounded-lg border border-white/5">
-                      <h3 className="text-zinc-500 text-xs uppercase tracking-widest mb-4 font-mono">Overview</h3>
-                      <p className="text-zinc-300 leading-loose font-light text-lg md:text-xl">
-                        {work.desc}
-                      </p>
-                   </div>
-                </div>
-
-                {/* Column 2: Media (Score & Video) */}
-                <div className="space-y-8">
-                    
-                    {/* Score Section */}
-                    <div>
-                        <div className="flex items-center justify-between mb-3">
-                            <h3 className="text-amber-500 text-xs uppercase tracking-widest font-mono">Score</h3>
-                            {work.scoreUrl && (
-                                <a 
-                                    href={work.scoreUrl} 
-                                    target="_blank" 
-                                    rel="noopener noreferrer"
-                                    className="bg-white text-black text-[10px] md:text-xs px-3 py-1.5 rounded font-bold hover:bg-zinc-200 transition-colors uppercase tracking-wide"
-                                >
-                                    Open External Link ↗
-                                </a>
-                            )}
-                        </div>
-                        
-                        <div className="w-full bg-zinc-950 border border-zinc-800 rounded-lg overflow-hidden relative group">
-                            {work.scoreIsWebPage ? (
-                                <div className="w-full h-[300px] relative bg-zinc-900 flex flex-col items-center justify-center">
-                                    <p className="text-zinc-500 mb-4 px-4 text-center text-sm">
-                                        Library Preview<br/>
-                                        <span className="text-xs opacity-50">(Click button above if blank)</span>
-                                    </p>
-                                    <iframe 
-                                        src={work.scoreUrl} 
-                                        className="w-full h-full absolute inset-0 opacity-100 z-10 bg-white"
-                                        title="Score Preview"
-                                    />
-                                </div>
-                            ) : (
-                                <div className="w-full bg-black/20 flex items-center justify-center h-[300px] md:h-[400px]">
-                                    <img 
-                                        src={work.scoreUrl} 
-                                        alt="Score" 
-                                        className="w-full h-full object-contain p-2" 
-                                        onError={(e) => (e.target as HTMLImageElement).style.display = 'none'}
-                                    />
-                                </div>
-                            )}
-                        </div>
+              {/* Grid Layout: Text on Left, Media on Right to reduce vertical scrolling */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+                  
+                  {/* Column 1: Overview & Details */}
+                  <div className="space-y-8">
+                    <div className="bg-black/40 p-8 rounded-lg border border-white/5">
+                        <h3 className="text-zinc-500 text-xs uppercase tracking-widest mb-4 font-mono">Overview</h3>
+                        <p className="text-zinc-300 leading-loose font-light text-lg">
+                          {work.desc}
+                        </p>
                     </div>
+                  </div>
 
-                    {/* Video Section */}
-                    <div>
-                         <div className="flex items-center justify-between mb-3">
-                            <h3 className="text-amber-500 text-xs uppercase tracking-widest font-mono">Recording</h3>
-                            <a 
-                                href={`https://www.youtube.com/watch?v=${work.videoId}`} 
-                                target="_blank" 
-                                rel="noopener noreferrer"
-                                className="bg-white text-black text-[10px] md:text-xs px-3 py-1.5 rounded font-bold hover:bg-zinc-200 transition-colors uppercase tracking-wide"
-                            >
-                                Open YouTube ↗
-                            </a>
-                        </div>
-                        <div className="w-full aspect-video bg-black rounded-lg overflow-hidden border border-zinc-800 shadow-xl">
-                           <iframe 
-                             className="w-full h-full"
-                             src={`https://www.youtube.com/embed/${work.videoId}`} 
-                             title={work.title}
-                             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-                             allowFullScreen
-                           ></iframe>
-                        </div>
-                    </div>
+                  {/* Column 2: Media (Score & Video) */}
+                  <div className="space-y-12">
+                      
+                      {/* Score Section */}
+                      <div>
+                          <div className="flex items-center justify-between mb-3">
+                              <h3 className="text-amber-500 text-xs uppercase tracking-widest font-mono">Score / Visuals</h3>
+                              {work.scoreType === 'web' && work.scoreUrl && (
+                                  <a 
+                                      href={work.scoreUrl} 
+                                      target="_blank" 
+                                      rel="noopener noreferrer"
+                                      className="bg-zinc-800 text-white text-[10px] md:text-xs px-3 py-1.5 rounded font-bold hover:bg-zinc-700 transition-colors uppercase tracking-wide border border-white/10"
+                                  >
+                                      Open Library ↗
+                                  </a>
+                              )}
+                          </div>
+                          
+                          <div className="w-full bg-zinc-950 border border-zinc-800 rounded-lg overflow-hidden relative group">
+                              {work.scoreType === 'web' ? (
+                                  <div className="w-full h-[400px] relative bg-zinc-900 flex flex-col items-center justify-center">
+                                      <p className="text-zinc-500 mb-4 px-4 text-center text-sm absolute z-0 top-1/2 -translate-y-1/2 w-full">
+                                          Loading External Library...<br/>
+                                          <span className="text-xs opacity-50">(If blank, use the button above)</span>
+                                      </p>
+                                      <iframe 
+                                          src={work.scoreUrl} 
+                                          className="w-full h-full absolute inset-0 opacity-100 z-10 bg-white"
+                                          title="Score Preview"
+                                      />
+                                  </div>
+                              ) : (
+                                  <div className="bg-black/20 flex flex-col gap-4 p-4 max-h-[500px] overflow-y-auto custom-scrollbar">
+                                      {work.scoreImages?.map((img, idx) => (
+                                          <div 
+                                              key={idx} 
+                                              className="relative group/img cursor-zoom-in border border-zinc-800 hover:border-amber-500/50 transition-colors"
+                                              onClick={() => setSelectedImage(img)}
+                                              title="Click to zoom"
+                                          >
+                                              <div className="absolute inset-0 bg-black/0 group-hover/img:bg-white/5 transition-colors z-10 flex items-center justify-center opacity-0 group-hover/img:opacity-100 pointer-events-none">
+                                                  <span className="bg-black/80 text-white text-xs px-2 py-1 rounded font-mono uppercase tracking-widest border border-white/10">Expand</span>
+                                              </div>
+                                              <img 
+                                                  src={img} 
+                                                  alt={`Score ${idx + 1}`} 
+                                                  className="w-full h-auto object-contain bg-white" 
+                                                  onError={(e) => {
+                                                      (e.target as HTMLImageElement).style.display = 'none';
+                                                  }}
+                                              />
+                                              <p className="text-zinc-600 text-xs text-center mt-2 font-mono pb-2">{img.split('/').pop()}</p>
+                                          </div>
+                                      ))}
+                                  </div>
+                              )}
+                          </div>
+                      </div>
 
-                </div>
-            </div>
+                      {/* Video Section */}
+                      <div>
+                          <h3 className="text-amber-500 text-xs uppercase tracking-widest font-mono mb-4">Recordings</h3>
+                          
+                          <div className="space-y-8">
+                              {work.videos.map((video, idx) => (
+                                  <div key={idx}>
+                                      <div className="flex items-center justify-between mb-2">
+                                          <span className="text-zinc-400 text-sm font-mono">{video.title}</span>
+                                          <a 
+                                              href={`https://www.youtube.com/watch?v=${video.id}`} 
+                                              target="_blank" 
+                                              rel="noopener noreferrer"
+                                              className="text-zinc-500 hover:text-white text-[10px] uppercase tracking-wide border-b border-transparent hover:border-white transition-all"
+                                          >
+                                              Watch on YouTube ↗
+                                          </a>
+                                      </div>
+                                      <div className="w-full aspect-video bg-black rounded-lg overflow-hidden border border-zinc-800 shadow-xl">
+                                          <iframe 
+                                              className="w-full h-full"
+                                              src={`https://www.youtube.com/embed/${video.id}`} 
+                                              title={video.title}
+                                              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                                              allowFullScreen
+                                          ></iframe>
+                                      </div>
+                                  </div>
+                              ))}
+                          </div>
+                      </div>
+
+                  </div>
+              </div>
+
+          </div>
 
         </div>
-
       </div>
-    </div>,
+      
+      {/* Lightbox Overlay */}
+      {selectedImage && (
+          <ImageViewer src={selectedImage} onClose={() => setSelectedImage(null)} />
+      )}
+    </>,
     document.body
   );
 };
@@ -240,6 +411,7 @@ const PreparedPianoWidget: React.FC = () => {
   const [material, setMaterial] = useState('Normal');
   const [activeKey, setActiveKey] = useState<string | null>(null);
   const [visualizerHeight, setVisualizerHeight] = useState(0);
+  const [showVideo, setShowVideo] = useState(false);
 
   const playSound = (note: string) => {
     setActiveKey(note);
@@ -377,6 +549,13 @@ const PreparedPianoWidget: React.FC = () => {
           <h3 className="text-3xl font-bold text-white mb-2 tracking-tight">Prepared Piano</h3>
           <p className="text-zinc-400 font-mono text-sm">Select material. Alter timbre. (Diatonic Scale)</p>
         </div>
+        <button 
+            onClick={() => setShowVideo(true)}
+            className="flex items-center gap-2 px-3 py-1.5 bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 rounded text-xs font-mono uppercase tracking-widest text-zinc-300 hover:text-white transition-all group"
+        >
+            <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>
+            Watch Demo
+        </button>
       </div>
 
       <div className="flex gap-3 mb-8 flex-wrap relative z-10 justify-center">
@@ -413,6 +592,33 @@ const PreparedPianoWidget: React.FC = () => {
           </button>
         ))}
       </div>
+
+      {showVideo && createPortal(
+          <div className="fixed inset-0 z-[10000] flex items-center justify-center p-4 bg-black/95 backdrop-blur-md animate-fade-in">
+              <div className="relative w-full max-w-5xl bg-zinc-900 rounded-lg border border-zinc-800 shadow-2xl overflow-hidden">
+                   <div className="flex justify-between items-center p-4 border-b border-zinc-800 bg-zinc-900">
+                      <h3 className="font-mono text-white text-sm uppercase tracking-widest">Prepared Piano Mechanism</h3>
+                      <button onClick={() => setShowVideo(false)} className="text-zinc-500 hover:text-white transition-colors">
+                          ✕ CLOSE
+                      </button>
+                   </div>
+                   <div className="aspect-video w-full bg-black">
+                      <iframe 
+                          width="100%" 
+                          height="100%" 
+                          src="https://www.youtube.com/embed/myXAUEuECqQ?autoplay=1" 
+                          title="Prepared Piano Demo" 
+                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                          allowFullScreen
+                          className="w-full h-full"
+                      ></iframe>
+                   </div>
+              </div>
+              {/* Backdrop click to close */}
+              <div className="absolute inset-0 -z-10" onClick={() => setShowVideo(false)}></div>
+          </div>,
+          document.body
+      )}
     </div>
   );
 };
@@ -641,7 +847,7 @@ const Concept: React.FC = () => {
             <h2 className="text-6xl md:text-9xl font-bold font-mono text-white mb-4 tracking-tighter mix-blend-difference select-none">
             CONCEPT
             </h2>
-            <p className="text-xl md:text-2xl font-light text-zinc-400 font-serif italic border-l-2 border-amber-500 pl-6">
+            <p className="text-xl md:text-2xl font-light text-zinc-400 font-serif italic border-l-2 border-amber-500 pl-6 mb-8">
                 A three-part timeline and interactive mini-demos
             </p>
         </div>
